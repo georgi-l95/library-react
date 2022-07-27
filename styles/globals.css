@@ -19,7 +19,6 @@ a {
   height: 80vh;
   width: 100vw;
   justify-content: center;
-  background-color: aqua;
   flex-wrap: wrap;
 }
 .menu {
@@ -38,7 +37,11 @@ a {
 .content {
   width: 70vw;
   height: 60vh;
-  background-color: brown;
   display: flex;
   justify-content: center;
+}
+
+.table {
+  width: 70vw;
+  border: 2px solid #96d4d4;
 }
