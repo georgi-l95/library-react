@@ -2,7 +2,6 @@ import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import { useState } from "react";
 import useTokenBalance from "../hooks/useTokenBalance";
-import useTokenContract from "../hooks/useTokenContract";
 import useWrapperContract from "../hooks/useWraperContract";
 import { parseBalance } from "../util";
 import Modal from "./Modal";
@@ -19,7 +18,6 @@ const TokenBalance = ({
   symbol,
 }: TokenBalanceProps) => {
   const { account } = useWeb3React<Web3Provider>();
-  const tokenContract = useTokenContract(tokenAddress);
   const wrapperContract = useWrapperContract(wrapperAddress);
   const { data } = useTokenBalance(account, tokenAddress);
   const [wrapQuantity, setWrapQuantity] = useState(0);
@@ -54,7 +52,6 @@ const TokenBalance = ({
   };
   return (
     <div>
-      {" "}
       {txLoading && (
         <Modal loading={txLoading}>
           <h5>

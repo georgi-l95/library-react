@@ -5,14 +5,17 @@ import Account from "../components/Account";
 import LibraryComponent from "../components/LibraryComponent/LibraryComponent";
 import useEagerConnect from "../hooks/useEagerConnect";
 import useLibraryContract from "../hooks/useLibraryContract";
-import { LIBRARY_ADDRESS } from "../constants";
+import useTokenContract from "../hooks/useTokenContract";
+import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
+import TokenBalance from "../components/TokenBalance";
 
 const Rent = () => {
   const { account, library } = useWeb3React();
   const [bookId, setBookId] = useState<number | undefined>();
   const triedToEagerConnect = useEagerConnect();
   const libraryContract = useLibraryContract(LIBRARY_ADDRESS);
+  const tokenContract = useTokenContract(LIB_ADDRESS);
   const [error, setError] = useState<string | undefined>();
   const [txLoading, setTxLoading] = useState(false);
   const [txHash, setTxHash] = useState("0x00000000000");
@@ -24,6 +27,13 @@ const Rent = () => {
 
   const submitRent = async (event) => {
     event.preventDefault();
+    const allowance = await tokenContract
+      .approve(LIBRARY_ADDRESS, "100000000000000000")
+      .catch((e) => {
+        return e;
+      });
+    console.log(allowance);
+    await allowance.wait();
     const tx = await libraryContract.rentBook(bookId).catch((e) => {
       return e;
     });
@@ -73,7 +83,11 @@ const Rent = () => {
           <Link href="/">
             <a>LimeAcademy-boilerplate</a>
           </Link>
-
+          <TokenBalance
+            tokenAddress={LIB_ADDRESS}
+            wrapperAddress={LIBWRAPPER_ADDRESS}
+            symbol="LIB"
+          />
           <Account triedToEagerConnect={triedToEagerConnect} />
         </nav>
       </header>

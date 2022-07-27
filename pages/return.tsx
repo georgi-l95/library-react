@@ -5,8 +5,9 @@ import Account from "../components/Account";
 import LibraryComponent from "../components/LibraryComponent/LibraryComponent";
 import useEagerConnect from "../hooks/useEagerConnect";
 import useLibraryContract from "../hooks/useLibraryContract";
-import { LIBRARY_ADDRESS } from "../constants";
+import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
+import TokenBalance from "../components/TokenBalance";
 
 const Return = () => {
   const { account, library } = useWeb3React();
@@ -74,7 +75,11 @@ const Return = () => {
           <Link href="/">
             <a>LimeAcademy-boilerplate</a>
           </Link>
-
+          <TokenBalance
+            tokenAddress={LIB_ADDRESS}
+            wrapperAddress={LIBWRAPPER_ADDRESS}
+            symbol="LIB"
+          />
           <Account triedToEagerConnect={triedToEagerConnect} />
         </nav>
       </header>
