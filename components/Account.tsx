@@ -13,7 +13,6 @@ type AccountProps = {
 const Account = ({ triedToEagerConnect }: AccountProps) => {
   const { active, error, activate, deactivate, chainId, account, setError } =
     useWeb3React();
-
   const {
     isMetaMaskInstalled,
     isWeb3Available,
@@ -61,15 +60,15 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
           >
             {isMetaMaskInstalled ? "Connect to MetaMask" : "Connect to Wallet"}
           </button>
-          
         ) : (
           <button onClick={startOnboarding}>Install Metamask</button>
         )}
-        {(<button
+        {
+          <button
             disabled={connecting}
             onClick={async () => {
               try {
-                await activate(walletConnect(), undefined, true)
+                await activate(walletConnect(), undefined, true);
               } catch (e) {
                 if (error instanceof UserRejectedRequestError) {
                   setConnecting(false);
@@ -77,9 +76,10 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
                   setError(error);
                 }
               }
-            }}>
+            }}
+          >
             Wallet Connect
-          </button>)
+          </button>
         }
       </div>
     );
@@ -87,28 +87,27 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
 
   return (
     <>
-        <a
-      {...{
-        href: formatEtherscanLink("Account", [chainId, account]),
-        target: "_blank",
-        rel: "noopener noreferrer",
-      }}
-    >
-      {ENSName || `${shortenHex(account, 4)}`}
-    </a>
-    <button
-          onClick={async () => {
-            try {
-              await deactivate()
-            } catch (e) { 
-              setError(error);
-            }
-          }}>
-          Disconnect
-        </button>
+      <a
+        {...{
+          href: formatEtherscanLink("Account", [chainId, account]),
+          target: "_blank",
+          rel: "noopener noreferrer",
+        }}
+      >
+        {ENSName || `${shortenHex(account, 4)}`}
+      </a>
+      <button
+        onClick={async () => {
+          try {
+            await deactivate();
+          } catch (e) {
+            setError(error);
+          }
+        }}
+      >
+        Disconnect
+      </button>
     </>
-   
-    
   );
 };
 

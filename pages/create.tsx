@@ -4,7 +4,7 @@ import Account from "../components/Account";
 import LibraryComponent from "../components/LibraryComponent/LibraryComponent";
 import useEagerConnect from "../hooks/useEagerConnect";
 
-function Home() {
+const Create = () => {
   const { account, library } = useWeb3React();
 
   const triedToEagerConnect = useEagerConnect();
@@ -32,6 +32,6 @@ function Home() {
       )}
     </div>
   );
-}
+};
 
-export default Home;
+export default Create;
