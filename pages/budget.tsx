@@ -9,6 +9,7 @@ import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
 import TokenBalance from "../components/TokenBalance";
 import NativeCurrencyBalance from "../components/NativeCurrencyBalance";
+import { ethers } from "ethers";
 
 const Budget = () => {
   const { account, library } = useWeb3React();
@@ -37,7 +38,6 @@ const Budget = () => {
   };
   const submitUnwrap = async (event) => {
     event.preventDefault();
-
     const unwrapTx = await libraryContract.unwrapProfit().catch((e) => {
       return e;
     });

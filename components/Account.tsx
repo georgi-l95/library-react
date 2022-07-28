@@ -2,7 +2,9 @@ import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
 import { injected, walletConnect } from "../connectors";
+import { LIBRARY_ADDRESS } from "../constants";
 import useENSName from "../hooks/useENSName";
+import useLibraryContract from "../hooks/useLibraryContract";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
 import { formatEtherscanLink, shortenHex } from "../util";
 
@@ -22,6 +24,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
 
   // manage connecting state for injected connector
   const [connecting, setConnecting] = useState(false);
+  const libraryContract = useLibraryContract(LIBRARY_ADDRESS);
   useEffect(() => {
     if (active || error) {
       setConnecting(false);

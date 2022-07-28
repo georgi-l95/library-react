@@ -78,19 +78,17 @@ const TokenBalance = ({
       <p>
         {`${symbol} Balance`}: {parseBalance(data ?? 0)}
       </p>
-      <p>
-        <form onSubmit={submitWrap}>
-          <label htmlFor="wrap">Give ETH to recieve LIB (1:1):</label>
-          <input
-            onChange={wrapInput}
-            value={wrapQuantity}
-            type="text"
-            id="wrap"
-            name="wrap"
-          />
-          <button type="submit">Wrap</button>
-        </form>
-      </p>
+      <form onSubmit={submitWrap}>
+        <label htmlFor="wrap">Give ETH to recieve LIB (1:1):</label>
+        <input
+          onChange={wrapInput}
+          value={wrapQuantity}
+          type="text"
+          id="wrap"
+          name="wrap"
+        />
+        <button type="submit">Wrap</button>
+      </form>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import useEagerConnect from "../hooks/useEagerConnect";
 import useLibraryContract from "../hooks/useLibraryContract";
 import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import TokenBalance from "../components/TokenBalance";
+import useTokenContract from "../hooks/useTokenContract";
 
 function Home() {
   const { account, library } = useWeb3React();
@@ -14,7 +15,6 @@ function Home() {
   const triedToEagerConnect = useEagerConnect();
   const [allBooks, setAllBooks] = useState([]);
   const isConnected = typeof account === "string" && !!library;
-
   useEffect(() => {
     getAllBooks().then((result) => {
       setAllBooks(result);
@@ -52,20 +52,22 @@ function Home() {
           <div className="content">
             <section>
               <table className="table">
-                <tr>
-                  <th>ID</th>
-                  <th>Book Title</th>
-                  <th>Quantity</th>
-                </tr>
-                {allBooks.length === 0
-                  ? "No Books in our library"
-                  : allBooks.map((book) => (
-                      <tr key={book.id}>
-                        <th>{book.id}</th>
-                        <th>{book.name}</th>
-                        <th>{book.quantity}</th>
-                      </tr>
-                    ))}
+                <tbody>
+                  <tr>
+                    <th>ID</th>
+                    <th>Book Title</th>
+                    <th>Quantity</th>
+                  </tr>
+                  {allBooks.length === 0
+                    ? "No Books in our library"
+                    : allBooks.map((book) => (
+                        <tr key={book.id}>
+                          <th>{book.id}</th>
+                          <th>{book.name}</th>
+                          <th>{book.quantity}</th>
+                        </tr>
+                      ))}
+                </tbody>
               </table>
             </section>
           </div>

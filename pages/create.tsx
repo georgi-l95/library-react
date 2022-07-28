@@ -3,10 +3,12 @@ import Link from "next/link";
 import { useState } from "react";
 import Account from "../components/Account";
 import LibraryComponent from "../components/LibraryComponent/LibraryComponent";
+import LIBRARY_ABI from "../contracts/Library.json";
 import useEagerConnect from "../hooks/useEagerConnect";
 import useLibraryContract from "../hooks/useLibraryContract";
 import { LIBRARY_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
+import { ethers } from "ethers";
 
 function Create() {
   const { account, library } = useWeb3React();
@@ -28,11 +30,23 @@ function Create() {
   };
   const submitBook = async (event) => {
     event.preventDefault();
-    const tx = await libraryContract
-      .addBook(bookName, bookQuantity)
-      .catch((e) => {
-        return e;
-      });
+    const iLibrary = new ethers.utils.Interface(LIBRARY_ABI);
+    const encodedData = iLibrary.encodeFunctionData("addBook", [
+      bookName,
+      bookQuantity,
+    ]);
+    const signer = library.getSigner();
+    const packedTx = {
+      to: LIBRARY_ADDRESS,
+      data: encodedData,
+    };
+    const tx = await signer.sendTransaction(packedTx);
+
+    // const tx = await libraryContract
+    //   .addBook(bookName, bookQuantity)
+    //   .catch((e) => {
+    //     return e;
+    //   });
     if ("hash" in tx) {
       setTxLoading(true);
       setTxHash(tx.hash);

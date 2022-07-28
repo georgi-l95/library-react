@@ -1,6 +1,7 @@
 import { Web3ReactProvider } from "@web3-react/core";
 import type { AppProps } from "next/app";
 import Head from "next/head";
+import Log from "../components/Log";
 import getLibrary from "../getLibrary";
 import "../styles/globals.css";
 
@@ -21,6 +22,7 @@ function NextWeb3App({ Component, pageProps }: AppProps) {
         </h1>
         <div className="bg">
           <Component {...pageProps} />
+          <Log />
         </div>
       </main>
 
