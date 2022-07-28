@@ -1,5 +1,3 @@
-import type { Web3Provider } from "@ethersproject/providers";
-import { useWeb3React } from "@web3-react/core";
 import { useState } from "react";
 import useTokenBalance from "../hooks/useTokenBalance";
 import useWrapperContract from "../hooks/useWraperContract";
@@ -10,14 +8,15 @@ type TokenBalanceProps = {
   tokenAddress: string;
   wrapperAddress: string;
   symbol: string;
+  account: string;
 };
 
 const TokenBalance = ({
   tokenAddress,
   wrapperAddress,
   symbol,
+  account,
 }: TokenBalanceProps) => {
-  const { account } = useWeb3React<Web3Provider>();
   const wrapperContract = useWrapperContract(wrapperAddress);
   const { data } = useTokenBalance(account, tokenAddress);
   const [wrapQuantity, setWrapQuantity] = useState(0);
@@ -31,7 +30,7 @@ const TokenBalance = ({
   const submitWrap = async (event) => {
     event.preventDefault();
     const tx = await wrapperContract
-      .wrap({ value: `${wrapQuantity}` })
+      .wrap({ value: `${wrapQuantity * 10 ** 18}` })
       .catch((e) => {
         return e;
       });

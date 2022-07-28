@@ -41,6 +41,7 @@ function Home() {
             tokenAddress={LIB_ADDRESS}
             wrapperAddress={LIBWRAPPER_ADDRESS}
             symbol="LIB"
+            account={account}
           />
           <Account triedToEagerConnect={triedToEagerConnect} />
         </nav>

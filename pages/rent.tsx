@@ -1,6 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Account from "../components/Account";
 import LibraryComponent from "../components/LibraryComponent/LibraryComponent";
 import useEagerConnect from "../hooks/useEagerConnect";
@@ -9,6 +9,7 @@ import useTokenContract from "../hooks/useTokenContract";
 import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
 import TokenBalance from "../components/TokenBalance";
+import { parseBalance } from "../util";
 
 const Rent = () => {
   const { account, library } = useWeb3React();
@@ -21,36 +22,46 @@ const Rent = () => {
   const [txHash, setTxHash] = useState("0x00000000000");
   const isConnected = typeof account === "string" && !!library;
 
+  const getRentPrice = async () => {
+    const rentPrice = await libraryContract.rentPrice();
+    return parseBalance(rentPrice, 0, 0);
+  };
   const bookIdInput = (input) => {
     setBookId(input.target.value);
   };
 
+  const handleResult = async (result) => {
+    if ("hash" in result) {
+      setTxLoading(true);
+      setTxHash(result.hash);
+      await result.wait();
+      setTxLoading(false);
+    } else {
+      if ("error" in result) {
+        setError(result.error.message.toString());
+      } else if ("message" in result) {
+        setError(result.message);
+      } else {
+        setError(result.toString());
+      }
+    }
+  };
   const submitRent = async (event) => {
     event.preventDefault();
+    const rentPirce = await getRentPrice();
     const allowance = await tokenContract
-      .approve(LIBRARY_ADDRESS, "100000000000000000")
+      .approve(LIBRARY_ADDRESS, rentPirce)
       .catch((e) => {
         return e;
       });
-    console.log(allowance);
-    await allowance.wait();
+
+    await handleResult(allowance);
+
     const tx = await libraryContract.rentBook(bookId).catch((e) => {
       return e;
     });
-    if ("hash" in tx) {
-      setTxLoading(true);
-      setTxHash(tx.hash);
-      await tx.wait();
-      setTxLoading(false);
-    } else {
-      if ("error" in tx) {
-        setError(tx.error.message.toString());
-      } else if ("message" in tx) {
-        setError(tx.message);
-      } else {
-        setError(tx.toString());
-      }
-    }
+
+    await handleResult(tx);
   };
   return (
     <div>
@@ -87,6 +98,7 @@ const Rent = () => {
             tokenAddress={LIB_ADDRESS}
             wrapperAddress={LIBWRAPPER_ADDRESS}
             symbol="LIB"
+            account={account}
           />
           <Account triedToEagerConnect={triedToEagerConnect} />
         </nav>
