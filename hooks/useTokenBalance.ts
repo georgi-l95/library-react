@@ -1,9 +1,9 @@
 import useSWR from "swr";
-import type { ERC20 } from "../contracts/types";
+import type { LIB } from "../contracts/types";
 import useKeepSWRDataLiveAsBlocksArrive from "./useKeepSWRDataLiveAsBlocksArrive";
 import useTokenContract from "./useTokenContract";
 
-function getTokenBalance(contract: ERC20) {
+function getTokenBalance(contract: LIB) {
   return async (_: string, address: string) => {
     const balance = await contract.balanceOf(address);
 

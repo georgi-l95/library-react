@@ -8,10 +8,10 @@ import useLibraryContract from "../hooks/useLibraryContract";
 import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
 import TokenBalance from "../components/TokenBalance";
+import NativeCurrencyBalance from "../components/NativeCurrencyBalance";
 
-const Return = () => {
+const Budget = () => {
   const { account, library } = useWeb3React();
-  const [bookId, setBookId] = useState<number | undefined>();
   const triedToEagerConnect = useEagerConnect();
   const libraryContract = useLibraryContract(LIBRARY_ADDRESS);
   const [error, setError] = useState<string | undefined>();
@@ -19,33 +19,40 @@ const Return = () => {
   const [txHash, setTxHash] = useState("0x00000000000");
   const isConnected = typeof account === "string" && !!library;
 
-  const bookIdInput = (input) => {
-    setBookId(input.target.value);
-  };
-
-  const submitRent = async (event) => {
-    event.preventDefault();
-    const tx = await libraryContract.returnBook(bookId).catch((e) => {
-      return e;
-    });
-    if ("hash" in tx) {
+  const handleResult = async (result) => {
+    if ("hash" in result) {
       setTxLoading(true);
-      setTxHash(tx.hash);
-      await tx.wait();
+      setTxHash(result.hash);
+      await result.wait();
       setTxLoading(false);
     } else {
-      if ("error" in tx) {
-        setError(tx.error.message.toString());
-      } else if ("message" in tx) {
-        setError(tx.message);
+      if ("error" in result) {
+        setError(result.error.message.toString());
+      } else if ("message" in result) {
+        setError(result.message);
       } else {
-        setError(tx.toString());
+        setError(result.toString());
       }
     }
   };
+  const submitUnwrap = async (event) => {
+    event.preventDefault();
+
+    const unwrapTx = await libraryContract.unwrapProfit().catch((e) => {
+      return e;
+    });
+    await handleResult(unwrapTx);
+  };
+
+  const submitWithdraw = async (event) => {
+    event.preventDefault();
+    const withdrawTx = await libraryContract.withdraw().catch((e) => {
+      return e;
+    });
+    await handleResult(withdrawTx);
+  };
   return (
     <div>
-      {" "}
       {txLoading && (
         <Modal loading={txLoading}>
           <h5>
@@ -75,12 +82,14 @@ const Return = () => {
           <Link href="/">
             <a>LimeAcademy-boilerplate</a>
           </Link>
+          <NativeCurrencyBalance account={LIBRARY_ADDRESS} />
           <TokenBalance
             tokenAddress={LIB_ADDRESS}
             wrapperAddress={LIBWRAPPER_ADDRESS}
             symbol="LIB"
-            account={account}
+            account={LIBRARY_ADDRESS}
           />
+
           <Account triedToEagerConnect={triedToEagerConnect} />
         </nav>
       </header>
@@ -89,16 +98,16 @@ const Return = () => {
           <LibraryComponent />
           <div className="content">
             <section>
-              <form onSubmit={submitRent}>
-                <label htmlFor="id">Book ID:</label>
-                <input
-                  onChange={bookIdInput}
-                  value={bookId}
-                  type="text"
-                  id="id"
-                  name="id"
-                />
-                <button type="submit">Return</button>
+              <form id="unwrap" onSubmit={submitUnwrap}>
+                <button type="submit">Unwrap LIB Balance</button>
+              </form>
+
+              <form
+                id="withdraw"
+                onSubmit={submitWithdraw}
+                style={{ margin: 10 }}
+              >
+                <button type="submit">Withdraw ETH Balance</button>
               </form>
             </section>
           </div>
@@ -108,4 +117,4 @@ const Return = () => {
   );
 };
 
-export default Return;
+export default Budget;

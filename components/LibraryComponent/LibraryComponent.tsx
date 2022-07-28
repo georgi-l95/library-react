@@ -15,6 +15,9 @@ const LibraryComponent = () => {
       <Link href="/return">
         <button>Return book</button>
       </Link>
+      <Link href="/budget">
+        <button>Manage budget</button>
+      </Link>
     </div>
   );
 };
