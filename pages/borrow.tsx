@@ -1,6 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Account from "../components/Account";
 import LibraryComponent from "../components/LibraryComponent/LibraryComponent";
 import useEagerConnect from "../hooks/useEagerConnect";
@@ -10,8 +10,9 @@ import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import Modal from "../components/Modal";
 import TokenBalance from "../components/TokenBalance";
 import { parseBalance } from "../util";
+import { utils } from "ethers";
 
-const Rent = () => {
+const Borrow = () => {
   const { account, library } = useWeb3React();
   const [bookId, setBookId] = useState<number | undefined>();
   const triedToEagerConnect = useEagerConnect();
@@ -22,10 +23,68 @@ const Rent = () => {
   const [txHash, setTxHash] = useState("0x00000000000");
   const isConnected = typeof account === "string" && !!library;
 
-  const getRentPrice = async () => {
-    const rentPrice = await libraryContract.rentPrice();
-    return parseBalance(rentPrice, 0, 0);
+  const getPreparedSignature = async (wrapValue) => {
+    const nonce = await tokenContract.nonces(account);
+    const deadline = +new Date() + 60 * 60;
+
+    const EIP712Domain = [
+      { name: "name", type: "string" },
+      { name: "version", type: "string" },
+      { name: "verifyingContract", type: "address" },
+    ];
+
+    const domain = {
+      name: await tokenContract.name(),
+      version: "1",
+      verifyingContract: tokenContract.address,
+    };
+
+    const Permit = [
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
+      { name: "value", type: "uint256" },
+      { name: "nonce", type: "uint256" },
+      { name: "deadline", type: "uint256" },
+    ];
+
+    const message = {
+      owner: account,
+      spender: LIBRARY_ADDRESS,
+      value: wrapValue.toString(),
+      nonce: nonce.toHexString(),
+      deadline,
+    };
+
+    const data = JSON.stringify({
+      types: {
+        EIP712Domain,
+        Permit,
+      },
+      domain,
+      primaryType: "Permit",
+      message,
+    });
+
+    const signatureLike = await library.send("eth_signTypedData_v4", [
+      account,
+      data,
+    ]);
+    const signature = await utils.splitSignature(signatureLike);
+
+    const preparedSignature = {
+      v: signature.v,
+      r: signature.r,
+      s: signature.s,
+      deadline,
+    };
+
+    return preparedSignature;
   };
+  const getBorrowPrice = async () => {
+    const borrowPrice = await libraryContract.rentPrice();
+    return parseBalance(borrowPrice, 0, 0);
+  };
+
   const bookIdInput = (input) => {
     setBookId(input.target.value);
   };
@@ -46,20 +105,23 @@ const Rent = () => {
       }
     }
   };
-  const submitRent = async (event) => {
+  const submitBorrow = async (event) => {
     event.preventDefault();
-    const rentPirce = await getRentPrice();
-    const allowance = await tokenContract
-      .approve(LIBRARY_ADDRESS, rentPirce)
+    const borrowPirce = await getBorrowPrice();
+    const preparedSignature = await getPreparedSignature(borrowPirce);
+
+    const tx = await libraryContract
+      .borrowBookWithPermit(
+        bookId,
+        borrowPirce,
+        preparedSignature.deadline,
+        preparedSignature.v,
+        preparedSignature.r,
+        preparedSignature.s
+      )
       .catch((e) => {
         return e;
       });
-
-    await handleResult(allowance);
-
-    const tx = await libraryContract.rentBook(bookId).catch((e) => {
-      return e;
-    });
 
     await handleResult(tx);
   };
@@ -108,7 +170,7 @@ const Rent = () => {
           <LibraryComponent />
           <div className="content">
             <section>
-              <form onSubmit={submitRent}>
+              <form onSubmit={submitBorrow}>
                 <label htmlFor="id">Book ID:</label>
                 <input
                   onChange={bookIdInput}
@@ -117,7 +179,7 @@ const Rent = () => {
                   id="id"
                   name="id"
                 />
-                <button type="submit">Rent</button>
+                <button type="submit">Borrow</button>
               </form>
             </section>
           </div>
@@ -127,4 +189,4 @@ const Rent = () => {
   );
 };
 
-export default Rent;
+export default Borrow;

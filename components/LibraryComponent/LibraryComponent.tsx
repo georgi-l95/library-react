@@ -9,8 +9,8 @@ const LibraryComponent = () => {
       <Link href="/create">
         <button>Add book</button>
       </Link>
-      <Link href="/rent">
-        <button>Rent book</button>
+      <Link href="/borrow">
+        <button>Borrow book</button>
       </Link>
       <Link href="/return">
         <button>Return book</button>
