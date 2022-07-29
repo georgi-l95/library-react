@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { LIBRARY_ADDRESS, LIBWRAPPER_ADDRESS, LIB_ADDRESS } from "../constants";
 import useLibraryContract from "../hooks/useLibraryContract";
 import useTokenContract from "../hooks/useTokenContract";
+import { parseBalance } from "../util";
 
 const Log = (props) => {
   const [logs, setLogs] = useState([]);
@@ -19,15 +20,15 @@ const Log = (props) => {
         null
       );
       const fitlerAddBook = libraryContract.filters.BookAdded(null, null, null);
-      const fitlerRentBook = libraryContract.filters.BookRented(null, null);
+      const fitlerBorrowBook = libraryContract.filters.BookBorrowed(null, null);
       const filterReturnBook = libraryContract.filters.BookReturn(null);
       libraryContract.on(fitlerAddBook, (id, name, quantity) => {
         const addBookLog = `Added book with ID: ${id} , name ${name} and quantity ${quantity}`;
         setLogs((prevState) => [...prevState, addBookLog]);
       });
-      libraryContract.on(fitlerRentBook, (id, address) => {
-        const rentBookLog = `Rented book with ID: ${id} from ${address}`;
-        setLogs((prevState) => [...prevState, rentBookLog]);
+      libraryContract.on(fitlerBorrowBook, (id, address) => {
+        const borrowBookLog = `Borrowed book with ID: ${id} from ${address}`;
+        setLogs((prevState) => [...prevState, borrowBookLog]);
       });
 
       libraryContract.on(filterReturnBook, (id) => {
@@ -36,7 +37,11 @@ const Log = (props) => {
       });
 
       tokenContract.on(fitlerTransfer, (from, to, value) => {
-        const transferTokenLog = `LIB transferred from ${from} to ${to} - ${value}`;
+        const transferTokenLog = `LIB transferred from ${from} to ${to} - ${parseBalance(
+          value.toString(),
+          18,
+          3
+        )} LIB`;
         setLogs((prevState) => [...prevState, transferTokenLog]);
       });
     }
